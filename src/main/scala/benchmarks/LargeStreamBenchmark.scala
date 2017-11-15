@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit
 
 import cats.effect.IO
 import monix.execution.Scheduler.Implicits.global
+import monix.reactive.OverflowStrategy.BackPressure
 import monix.reactive.{Consumer, Observable}
 import org.apache.commons.io.IOUtils
 import org.openjdk.jmh.annotations._
@@ -81,6 +82,17 @@ class LargeStreamBenchmark {
     val inputStream = new FileInputStream(new File(src))
     val outputStream = new FileOutputStream(target)
     val process = Observable.fromInputStream(inputStream, DefaultBufferSize)
+      .consumeWith(Consumer.foreach(bytes => outputStream.write(bytes)))
+
+    Await.result(process.runAsync, 2.minute)
+  }
+
+  @Benchmark
+  def monixObservableWithAsyncBoundary() = {
+    val inputStream = new FileInputStream(new File(src))
+    val outputStream = new FileOutputStream(target)
+    val process = Observable.fromInputStream(inputStream, DefaultBufferSize)
+      .asyncBoundary(BackPressure(1000))
       .consumeWith(Consumer.foreach(bytes => outputStream.write(bytes)))
 
     Await.result(process.runAsync, 2.minute)
