@@ -4,8 +4,10 @@ import java.io.{File, FileInputStream, FileOutputStream}
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
+import benchmarks.NIO.{DefaultBufferSize, src, target}
 import cats.effect.IO
 import monix.execution.Scheduler.Implicits.global
+import monix.nio.file.{readAsync, writeAsync}
 import monix.reactive.OverflowStrategy.BackPressure
 import monix.reactive.{Consumer, Observable}
 import org.apache.commons.io.IOUtils
@@ -96,6 +98,21 @@ class LargeStreamBenchmark {
       .consumeWith(Consumer.foreach(bytes => outputStream.write(bytes)))
 
     Await.result(process.runAsync, 2.minute)
+  }
+
+  @Benchmark
+  def monixNioBenchmark() = {
+    val from = java.nio.file.Paths.get(src)
+    val to = java.nio.file.Paths.get(target)
+
+    val consumer = writeAsync(to)
+
+    val future = readAsync(from, DefaultBufferSize)
+      .asyncBoundary(BackPressure(100))
+      .consumeWith(consumer)
+      .runAsync
+
+    Await.result(future, 1.minute)
   }
 
   @Benchmark
