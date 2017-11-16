@@ -66,8 +66,8 @@ import scala.concurrent.duration._
 class LargeStreamBenchmark {
 
   val DefaultBufferSize = 10240
-  val src = "/Users/luke.stephenson/projects/listings/listing-publisher-api/results4.txt"
-  val target = "/Users/luke.stephenson/projects/listings/listing-publisher-api/results3.txt"
+  val src = "/Users/luke.stephenson/projects/listings/results4.txt"
+  val target = "/Users/luke.stephenson/projects/listings/results3.txt"
 
   @Benchmark
   def commonsIo() = {
