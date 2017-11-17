@@ -99,7 +99,7 @@ class LargeStreamBenchmark {
   }
 
   @Benchmark
-  def fs2Stream() = {
+  def fs2NioStream() = {
     val file = new File(src)
 
     val process = fs2.io.file.readAll[IO](file.toPath, DefaultBufferSize)
@@ -107,6 +107,14 @@ class LargeStreamBenchmark {
       .run
 
     process.unsafeRunSync()
+  }
+
+  @Benchmark
+  def fs2IoStream() = {
+    val inputStream = IO(new FileInputStream(new File(src)))
+    val outputStream = IO(new FileOutputStream(target))
+    val process = fs2.io.unsafeReadInputStream[IO](inputStream, DefaultBufferSize)
+    process.through(fs2.io.writeOutputStream[IO](outputStream)).run.unsafeRunSync()
   }
 
 }
