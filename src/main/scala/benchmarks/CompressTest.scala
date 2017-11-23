@@ -4,7 +4,10 @@ import java.io.File
 import java.nio.file.Paths
 
 import cats.effect.IO
-
+/**
+ * results4.txt is a 4GB file.
+ * run this with -Xmx56m
+ **/
 object CompressTest {
   val DefaultBufferSize = 1
   val src = "/Users/luke.stephenson/projects/listings/results4.txt"
